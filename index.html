@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Marketing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F4F6FB;color:#111827;font-size:14px;line-height:1.5}
+.hd{background:#fff;border-bottom:1px solid #E5E7ED;padding:14px 20px 12px;position:sticky;top:0;z-index:10}
+.ey{font-size:10px;font-weight:600;color:#185FA5;text-transform:uppercase;letter-spacing:.09em;margin-bottom:2px}
+.h1{font-size:20px;font-weight:600;color:#111827}
+.hs{font-size:12px;color:#6B7280;margin-top:1px}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px}
+.last-update{font-size:11px;color:#9CA3AF}
+.refresh-btn{background:#fff;border:1px solid #E5E7ED;color:#374151;padding:6px 13px;border-radius:6px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:5px}
+.refresh-btn:hover{background:#F9FAFB}
+.wr{max-width:1280px;margin:0 auto;padding:0 16px 4rem}
+.st{font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 9px}
+.fr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-top:14px}
+.fr select{font-size:12px;background:#fff;border:1px solid #E5E7ED;color:#374151;border-radius:6px;padding:7px 11px;cursor:pointer;outline:none}
+.fr select:focus{border-color:#185FA5}
+.kr{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:10px}
+.kc{background:#fff;border-radius:10px;border:1px solid #E5E7ED;padding:12px 14px}
+.kl{font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.kv{font-size:20px;font-weight:600;color:#111827;font-variant-numeric:tabular-nums}
+.ks{font-size:11px;margin-top:4px}
+.up{color:#059669}.dn{color:#DC2626}.mu{color:#9CA3AF}
+.kc.hi{border-color:#BFDBFE;background:#EFF6FF}
+.kc.hi .kl{color:#185FA5}.kc.hi .kv{color:#1D4ED8}.kc.hi .ks{color:#60A5FA}
+
+.kc.sql{border-color:#BBF7D0;background:#F0FDF4}
+.kc.sql .kl{color:#059669}.kc.sql .kv{color:#047857}.kc.sql .ks{color:#10B981}
+.cc{background:#fff;border-radius:10px;border:1px solid #E5E7ED;padding:14px 16px;margin-bottom:10px}
+.ct{font-size:13px;font-weight:600;color:#111827;margin-bottom:2px}
+.cs{font-size:11px;color:#9CA3AF;margin-bottom:9px}
+.lg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:#6B7280}
+.ld{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:6px}
+.ck{background:#F9FAFB;border-radius:6px;border:1px solid #F3F4F6;padding:9px 11px}
+.cl2{font-size:10px;color:#9CA3AF;margin-bottom:2px}
+.cv{font-size:15px;font-weight:600;color:#111827}
+.cd{font-size:11px;margin-top:2px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;padding:7px 10px;border-bottom:1px solid #F3F4F6;background:#FAFAFA;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid #F9FAFB;color:#374151;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F9FAFB}
+.bk{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.bok{background:#DCFCE7;color:#166534}.bwn{background:#FEF9C3;color:#854D0E}.bbd{background:#FEE2E2;color:#991B1B}
+.al{display:flex;align-items:flex-start;gap:9px;padding:9px 13px;border-radius:8px;margin-bottom:6px;font-size:12px;line-height:1.6;border-left:3px solid}
+.aok{background:#F0FDF4;border-color:#22C55E;color:#15803D}
+.awn{background:#FFFBEB;border-color:#F59E0B;color:#92400E}
+.abd{background:#FFF1F2;border-color:#F43F5E;color:#9F1239}
+.dv{height:1px;background:#F3F4F6;margin:16px 0}
+.fi{margin-bottom:7px}
+.fh{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.fn{font-weight:600;color:#374151}.fv{color:#9CA3AF}
+.ft{background:#F3F4F6;border-radius:3px;height:20px;overflow:hidden}
+.fb{height:100%;border-radius:3px}
+.empty{text-align:center;padding:24px;color:#9CA3AF;font-size:12px}
+#loading{position:fixed;inset:0;background:#F4F6FB;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:100}
+.loader{width:34px;height:34px;border:3px solid #E5E7ED;border-top-color:#185FA5;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{font-size:13px;color:#9CA3AF}
+#loading.hidden{display:none}
+#app{display:none}
+@media(max-width:640px){.g2{grid-template-columns:1fr}.hrow{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loader"></div>
+  <p class="load-text">Carregando dados...</p>
+</div>
+
+<div id="app">
+<div class="hd">
+  <div class="hrow">
+    <div>
+      <p class="ey">Grupo MNGT</p>
+      <h1 class="h1">Dashboard de Marketing</h1>
+      <p class="hs" id="subTitle">Área Incrível · Terrenistas</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="last-update" id="lastUpdate"></span>
+      <button class="refresh-btn" onclick="loadAllData()">↻ Atualizar</button>
+    </div>
+  </div>
+</div>
+
+<div class="wr">
+  <div class="fr">
+    <select id="fPeriod" onchange="onPeriodChange()">
+    </select>
+    <div id="dateRangeWrap" style="display:none;align-items:center;gap:6px">
+      <span style="font-size:12px;color:#6B7280">De</span>
+      <input type="date" id="fDateFrom" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;border:1px solid #E5E7EB;border-radius:6px;color:#1F2937">
+      <span style="font-size:12px;color:#6B7280">Até</span>
+      <input type="date" id="fDateTo" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;border:1px solid #E5E7EB;border-radius:6px;color:#1F2937">
+    </div>
+    <div id="fEmpresa" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;background:#EFF6FF;color:#1D4ED8;font-weight:600">
+        <input type="checkbox" id="cb_ai" value="Área Incrível" onchange="onEmpresaChange()" checked style="accent-color:#2563EB"> Área Incrível</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;background:#F5F3FF;color:#6D28D9;font-weight:600">
+        <input type="checkbox" id="cb_tr" value="Terrenistas" onchange="onEmpresaChange()" checked style="accent-color:#7C3AED"> Terrenistas</label>
+    </div>
+    <select id="fPlat" onchange="applyFilters()">
+      <option>Todas as plataformas</option><option>Meta Ads</option><option>Google Ads</option><option>LinkedIn Ads</option><option>TikTok Ads</option><option>WhatsApp</option><option>Orgânico</option><option>Indicação</option>
+    </select>
+    <select id="fCamp" onchange="applyFilters()"><option>Todas as campanhas</option></select>
+  </div>
+
+  <p class="st">Performance por empresa</p>
+  <div class="cc"><div class="tw"><table>
+    <thead><tr><th>Empresa</th><th>Leads</th><th>Qualificados</th><th>Investimento</th><th>CPL</th><th>CAC</th><th>Vendas</th><th>Receita</th><th>ROI</th><th>Conversão</th><th>Meta</th></tr></thead>
+    <tbody id="empresaTb"></tbody>
+  </table></div></div>
+
+  <p class="st">Visão geral</p>
+  <div class="kr" id="kpiGrid"></div>
+
+  <div class="dv"></div>
+  <p class="st">Evolução de leads</p>
+
+  <div class="cc">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <p class="ct">Leads diários</p>
+      <span id="periodLabel" style="font-size:11px;color:#9CA3AF"></span>
+    </div>
+    <div class="lg" id="lgDaily"></div>
+    <div style="position:relative;height:200px"><canvas id="c1" role="img" aria-label="Leads diários por empresa."></canvas></div>
+  </div>
+
+  <div class="g2">
+    <div class="cc" style="margin-bottom:0">
+      <p class="ct">Leads mensais — últimos 12 meses</p>
+      <div class="lg" id="lgMonthly"></div>
+      <div style="position:relative;height:185px"><canvas id="c2" role="img" aria-label="Leads mensais por empresa."></canvas></div>
+    </div>
+    <div class="cc" style="margin-bottom:0">
+      <p class="ct" id="compareTitle" style="margin-bottom:11px">Atual vs. mês anterior</p>
+      <div class="cg" id="compGrid"></div>
+    </div>
+  </div>
+
+  <div class="dv"></div>
+  <p class="st">Canais e funil</p>
+
+  <div class="g2">
+    <div class="cc" style="margin-bottom:0">
+      <p class="ct">Origem dos leads por plataforma</p>
+      <div style="position:relative" id="platWrap"><canvas id="c3" role="img" aria-label="Leads por plataforma."></canvas></div>
+    </div>
+    <div id="funnelSection" class="cc" style="margin-bottom:0">
+      <p class="ct">Funil de conversão</p>
+      <p class="cs" id="funnelSubtitle">Grupo consolidado</p>
+      <div id="funnel"></div>
+    </div>
+  </div>
+
+  <div class="dv"></div>
+  <p class="st">Eficiência e retorno</p>
+
+  <div class="cc">
+    <p class="ct">CAC × ROI por empresa</p>
+    <p class="cs">Barras = custo de aquisição (R$) · Linha = retorno sobre investimento (R$)</p>
+    <div class="lg">
+      <span><span class="ld" style="background:rgba(220,38,38,0.7)"></span>CAC (R$) — eixo esquerdo</span>
+      <span><span class="ld" style="background:#059669"></span>ROI (R$) — eixo direito</span>
+    </div>
+    <div style="position:relative;height:240px"><canvas id="c4" role="img" aria-label="CAC e ROI por empresa."></canvas></div>
+  </div>
+
+  <div class="dv"></div>
+  <div id="campAlertsSection"><p class="st" id="campSectionTitle">Performance por campanha</p>
+  <div class="cc"><div class="tw"><table style="min-width:700px">
+    <thead><tr><th>Campanha</th><th>Empresa</th><th>Plataforma</th><th>Investimento</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>Leads</th><th>CPL</th><th>Vendas</th><th>ROI</th></tr></thead>
+    <tbody id="campTb"></tbody>
+  </table></div></div>
+
+  <p class="st" id="alertsSectionTitle">Alertas inteligentes</p>
+  <div id="alertsBox"></div>
+</div>
+</div></div>
+
+<script>
+// v13: trocado de "Publicar na Web" (pub?gid=...) pro endpoint de export direto
+// (/export?format=csv&gid=...). O link de Publicar na Web se mostrou instável —
+// toda vez que a planilha era republicada, um ou mais gids paravam de responder
+// (401/404) mesmo sem o gid real ter mudado. O /export usa o ID permanente da
+// planilha (o mesmo do Code.gs) e só depende de permissão de compartilhamento
+// ("Qualquer pessoa com o link" → Leitor), que não se reseta sozinha.
+const SPREADSHEET_ID = '1olvSVXtRrZgKVFfGBH9L7yWJeYzDXXhy-IpCR_b643k';
+const SHEET_BASE = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=`;
+const SHEETS = {
+  kpis:          SHEET_BASE+'1166282157',
+  leads_diarios: SHEET_BASE+'11334140',
+  leads_mensais: SHEET_BASE+'1514319272',
+  plataformas:   SHEET_BASE+'1762653540',
+  campanhas:     SHEET_BASE+'1273319349',
+  funil:         SHEET_BASE+'1816261762',
+  camp_diarias:  SHEET_BASE+'684282188',
+  funil_diario:  SHEET_BASE+'560231025',
+};
+
+const tc='#9CA3AF',gc='rgba(0,0,0,0.05)';
+const COLORS={'Área Incrível':'#2563EB','Terrenistas':'#7C3AED','Mais Armazém':'#059669','Centro Logístico':'#D97706'};
+const MQL_RATE=0.70,SQL_RATE=0.26;
+
+const DEMO={
+  kpis:{
+    'Jun 2026':[
+      {empresa:'Área Incrível',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Mais Armazém',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Centro Logístico',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0}
+    ],
+    'Mai 2026':[
+      {empresa:'Área Incrível',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Mais Armazém',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Centro Logístico',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0}
+    ],
+    'Abr 2026':[
+      {empresa:'Área Incrível',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Mais Armazém',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Centro Logístico',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0}
+    ],
+    'Mar 2026':[
+      {empresa:'Área Incrível',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Mais Armazém',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Centro Logístico',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0}
+    ],
+    'Fev 2026':[
+      {empresa:'Área Incrível',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Mais Armazém',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Centro Logístico',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0}
+    ],
+    'Jan 2026':[
+      {empresa:'Área Incrível',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Mais Armazém',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0},
+      {empresa:'Centro Logístico',leads_hoje:0,leads_mes:0,meta_mes:0,investimento:0,cpl:0,cac:0,roi:0,taxa:0,pipeline:0,receita:0}
+    ]
+  },
+  leads_diarios:{
+    'Jun 2026':{'Área Incrível':[],'Mais Armazém':[],'Centro Logístico':[],meta:0},
+    'Mai 2026':{'Área Incrível':[],'Mais Armazém':[],'Centro Logístico':[],meta:0},
+    'Abr 2026':{'Área Incrível':[],'Mais Armazém':[],'Centro Logístico':[],meta:0},
+    'Mar 2026':{'Área Incrível':[],'Mais Armazém':[],'Centro Logístico':[],meta:0},
+    'Fev 2026':{'Área Incrível':[],'Mais Armazém':[],'Centro Logístico':[],meta:0},
+    'Jan 2026':{'Área Incrível':[],'Mais Armazém':[],'Centro Logístico':[],meta:0},
+  },
+  leads_mensais:{
+    labels:['Jan/26','Fev/26','Mar/26','Abr/26','Mai/26','Jun/26'],
+    'Área Incrível':[0,0,0,0,0,0],
+    'Terrenistas':[0,0,0,0,0,0],
+    'Mais Armazém':[0,0,0,0,0,0],
+    'Centro Logístico':[0,0,0,0,0,0]
+  },
+  plataformas:{
+    'Todas as empresas':[],
+    'Área Incrível':[],
+    'Mais Armazém':[],
+    'Centro Logístico':[]
+  },
+  campanhas:[],
+  funil:{}
+};
+
+let DB=JSON.parse(JSON.stringify(DEMO));
+DB.camp_diarias=[];
+DB.funilDiarioAll=[];
+DB.leadsDiariosAll=[];
+DB.leadsDiariosMeta=15;
+let charts={};
+
+function parseBR(v){
+  if(!v||v==='—'||v===''||v===null||v===undefined) return 0;
+  // Remove R$, x, spaces, then convert BR format (1.234,56) to JS (1234.56)
+  const s=String(v).replace(/R\$\s*/g,'').replace(/x$/i,'').replace(/\./g,'').replace(',','.').trim();
+  return Number(s)||0;
+}
+// Alguns cabeçalhos na planilha vêm com espaço sobrando (ex: "Terrenistas ")
+// e isso quebra a leitura por nome de coluna. Normaliza tirando espaço nas pontas.
+function trimKeys(row){
+  const out={};
+  for(const k in row){ out[k.trim()]=row[k]; }
+  return out;
+}
+function fmtBRL(v){return'R$'+Math.round(Number(v)).toLocaleString('pt-BR')}
+function fmtK(v){return fmtBRL(v)}
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function getSelectedEmpresas(empresaStr){
+  if(!empresaStr) return ['Área Incrível','Terrenistas'];
+  return empresaStr.split('|');
+}
+function getState(){
+  const cbs=document.querySelectorAll('#fEmpresa input[type=checkbox]:checked');
+  const sel=Array.from(cbs).map(c=>c.value);
+  const all=['Área Incrível','Terrenistas'];
+  const empresa=sel.length===0||sel.length===all.length?null:sel.join('|');
+  return{period:document.getElementById('fPeriod').value,empresa,plat:document.getElementById('fPlat').value,camp:document.getElementById('fCamp').value};
+}
+
+// O filtro de datas só existe pra Área Incrível/Terrenistas (dado diário real vem
+// de Campanhas Diárias). Essas duas funções centralizam a checagem e o filtro,
+// usadas em todos os blocos que respeitam o intervalo de datas.
+function isDateFilterActive(s){
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const isAiOrTr=selectedEmpresas.length>0&&selectedEmpresas.every(e=>e==='Área Incrível'||e==='Terrenistas');
+  const from=document.getElementById('fDateFrom').value;
+  const to=document.getElementById('fDateTo').value;
+  return isAiOrTr&&!!from&&!!to&&DB.camp_diarias.length>0;
+}
+
+// Núcleo comum: filtra Campanhas Diárias por empresa + intervalo de datas
+// explícito (não necessariamente o do filtro na tela — usado também pra
+// calcular o "mesmo intervalo, mês anterior").
+function filtrarCampDiarias(selectedEmpresas, fromDate, toDate, anoPadrao){
+  return DB.camp_diarias.filter(r=>{
+    if(!selectedEmpresas.includes(r.empresa)) return false;
+    const parts=r.data.split('/');
+    let d;
+    if(parts.length===3){
+      d=new Date(parts[2],parts[1]-1,parts[0]);
+    } else if(parts.length===2){
+      d=new Date(anoPadrao,parts[1]-1,parts[0]);
+    } else {
+      return false;
+    }
+    return d>=fromDate&&d<=toDate;
+  });
+}
+
+function getCampDiariasFiltrado(s){
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const from=document.getElementById('fDateFrom').value;
+  const to=document.getElementById('fDateTo').value;
+  const fromDate=new Date(from+'T00:00:00');
+  const toDate=new Date(to+'T23:59:59');
+  const anoPadrao=Number(from.split('-')[0]);
+  return filtrarCampDiarias(selectedEmpresas, fromDate, toDate, anoPadrao);
+}
+
+// Soma Leads Diários (GHL, fonte real de leads) no intervalo exato do filtro.
+// Usado pro número de "Leads" em vez de Campanhas Diárias (Meta) — Leads deve
+// sempre refletir o volume real do CRM, com ou sem filtro de data; só
+// Investimento/CPL/CAC/ROI é que dependem do Meta, por não ter outra fonte de gasto.
+function getLeadsDiariosFiltrado(s){
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const from=document.getElementById('fDateFrom').value;
+  const to=document.getElementById('fDateTo').value;
+  const fromDate=new Date(from+'T00:00:00');
+  const toDate=new Date(to+'T23:59:59');
+  const ano=Number(from.split('-')[0]);
+  const mapaEmpresaCol={'Área Incrível':'Área Incrível','Terrenistas':'Terrenistas','Mais Armazém':'Mais Armazém','Centro Logístico':'Centro Logístico'};
+  let total=0;
+  (DB.leadsDiariosAll||[]).forEach(r=>{
+    const data=(r['Data']||r['data']||'').trim();
+    const partes=data.split('/');
+    if(partes.length!==2) return;
+    const d=new Date(ano,Number(partes[1])-1,Number(partes[0]));
+    if(d<fromDate||d>toDate) return;
+    selectedEmpresas.forEach(emp=>{
+      if(mapaEmpresaCol[emp]) total+=Number(r[mapaEmpresaCol[emp]])||0;
+    });
+  });
+  return total;
+}
+
+// Núcleo comum: agrega Funil Diário por empresa dentro de um intervalo
+// explícito. Retorna null se não achar nenhuma linha no intervalo.
+function agregarFunilDiario(selectedEmpresas, fromDate, toDate, ano){
+  if(!DB.funilDiarioAll||!DB.funilDiarioAll.length) return null;
+  const linhas=DB.funilDiarioAll.filter(r=>{
+    if(!selectedEmpresas.includes(r.empresa)) return false;
+    const partes=r.data.split('/');
+    if(partes.length!==2) return false;
+    const d=new Date(ano,Number(partes[1])-1,Number(partes[0]));
+    return d>=fromDate&&d<=toDate;
+  });
+  if(!linhas.length) return null;
+  const porEmpresa={};
+  linhas.forEach(r=>{
+    if(!porEmpresa[r.empresa]) porEmpresa[r.empresa]={empresa:r.empresa,mql:0,sql:0,oportunidades:0,negociacoes:0,vendas:0,receita:0,visita_agendada:0,visita_realizada:0,em_atendimento:0,pre_analise:0,qualificado_tr:0,perdido:0,dia_1:0,dia_3:0,dia_7:0,dia_15:0,nutricao:0,aguardando_atendimento:0,aguardando_kmz:0};
+    const g=porEmpresa[r.empresa];
+    g.mql+=r.mql; g.sql+=r.sql; g.oportunidades+=r.oportunidades; g.negociacoes+=r.negociacoes;
+    g.vendas+=r.vendas; g.receita+=r.receita; g.visita_agendada+=r.visita_agendada;
+    g.visita_realizada+=r.visita_realizada; g.em_atendimento+=r.em_atendimento;
+    g.pre_analise+=r.pre_analise; g.qualificado_tr+=r.qualificado_tr; g.perdido+=(r.perdido||0);
+    g.dia_1+=(r.dia_1||0); g.dia_3+=(r.dia_3||0); g.dia_7+=(r.dia_7||0); g.dia_15+=(r.dia_15||0); g.nutricao+=(r.nutricao||0);
+    g.aguardando_atendimento+=(r.aguardando_atendimento||0); g.aguardando_kmz+=(r.aguardando_kmz||0);
+  });
+  return Object.values(porEmpresa);
+}
+
+// Agrega o Funil Diário (dd/MM, sem ano) dentro do intervalo escolhido, por
+// empresa — mesmo formato de getFunilData(), pra poder reaproveitar
+// renderFunnel/renderKPIs sem duplicar lógica de exibição.
+// Retorna null se a aba ainda não tem dado pro período (ex: meses anteriores
+// à criação da aba, ou Mais Armazém/Centro Logístico que não usam funil).
+function getFunilDiarioFiltrado(s){
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const from=document.getElementById('fDateFrom').value;
+  const to=document.getElementById('fDateTo').value;
+  const fromDate=new Date(from+'T00:00:00');
+  const toDate=new Date(to+'T23:59:59');
+  const ano=Number(from.split('-')[0]);
+  return agregarFunilDiario(selectedEmpresas, fromDate, toDate, ano);
+}
+
+// Calcula o mesmo intervalo de dias, um mês antes (ex: 01-05/07 -> 01-05/06).
+// Usado pra comparar "Atual vs. mês anterior" de forma justa quando o filtro
+// de data está ativo, em vez de comparar contra o mês anterior inteiro.
+function getIntervaloMesAnterior(from,to){
+  const [fy,fm,fd]=from.split('-').map(Number);
+  const [ty,tm,td]=to.split('-').map(Number);
+  const fromPrev=new Date(fy,fm-2,fd,0,0,0);
+  const toPrev=new Date(ty,tm-2,td,23,59,59);
+  return {fromPrev,toPrev};
+}
+
+
+// Recalcula os Leads Diários para o período (mês) selecionado a partir dos
+// dados brutos guardados em DB.leadsDiariosAll. Corrige o bug antigo que
+// misturava dias de meses diferentes (ex: 01/06 e 01/07 caindo no mesmo dia)
+// e que só calculava uma vez no carregamento da página.
+function computeLeadsDiarios(period){
+  const mesesAbrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesIdx=mesesAbrev.indexOf((period||'').split(' ')[0]);
+  const mesMM=mesIdx>=0?String(mesIdx+1).padStart(2,'0'):null;
+  const rows=(DB.leadsDiariosAll||[]).filter(r=>{
+    const data=(r['Data']||r['data']||'').trim();
+    const partes=data.split('/');
+    return mesMM&&partes.length===2&&partes[1]===mesMM;
+  });
+  const porDia={};
+  rows.forEach(r=>{
+    const data=(r['Data']||r['data']||'').trim();
+    const dia=parseInt(data.split('/')[0],10);
+    if(!porDia[dia]) porDia[dia]={ai:0,tr:0,ma:0,cl:0};
+    porDia[dia].ai+=Number(r['Área Incrível']||r['area_incrivel'])||0;
+    porDia[dia].tr+=Number(r['Terrenistas']||r['terrenistas'])||0;
+    porDia[dia].ma+=Number(r['Mais Armazém']||r['mais_armazem'])||0;
+    porDia[dia].cl+=Number(r['Centro Logístico']||r['centro_logistico'])||0;
+  });
+  const arrAI=[],arrTR=[],arrMA=[],arrCL=[];
+  for(let d=1;d<=31;d++){
+    arrAI.push(porDia[d]?porDia[d].ai:0);
+    arrTR.push(porDia[d]?porDia[d].tr:0);
+    arrMA.push(porDia[d]?porDia[d].ma:0);
+    arrCL.push(porDia[d]?porDia[d].cl:0);
+  }
+  return{
+    'Área Incrível':arrAI,
+    'Terrenistas':arrTR,
+    'Mais Armazém':arrMA,
+    'Centro Logístico':arrCL,
+    meta:DB.leadsDiariosMeta||15,
+  };
+}
+
+async function fetchCSV(url,skipRows,skipNoteRow){
+  return new Promise(resolve=>{
+    Papa.parse(url,{
+      download:true,header:true,skipEmptyLines:true,
+      beforeFirstChunk:function(chunk){
+        if(!skipRows) return chunk;
+        const lines=chunk.split(/\r?\n/);
+        const sliced=lines.slice(skipRows);
+        if(skipNoteRow && sliced.length>1) sliced.splice(1,1);
+        return sliced.join('\n');
+      },
+      complete:r=>resolve(r.data),error:()=>resolve(null)
+    });
+  });
+}
+
+async function loadAllData(){
+  document.getElementById('lastUpdate').textContent='Carregando...';
+  try{
+    let [k,ld,lm,plt,camp,fun,cd,fd]=await Promise.all([
+      fetchCSV(SHEETS.kpis,2,true),
+      fetchCSV(SHEETS.leads_diarios,0,false),
+      fetchCSV(SHEETS.leads_mensais,2,false),
+      fetchCSV(SHEETS.plataformas,2,true),
+      fetchCSV(SHEETS.campanhas,2,true),
+      fetchCSV(SHEETS.funil,2,true),
+      fetchCSV(SHEETS.camp_diarias,2,true),
+      fetchCSV(SHEETS.funil_diario,0,false)
+    ]);
+    // Normaliza cabeçalhos com espaço sobrando (ex: "Terrenistas " na planilha)
+    // pra todas as abas de uma vez, não só a que já tinha dado o problema.
+    k=k?k.map(trimKeys):k; ld=ld?ld.map(trimKeys):ld; lm=lm?lm.map(trimKeys):lm;
+    plt=plt?plt.map(trimKeys):plt; camp=camp?camp.map(trimKeys):camp;
+    fun=fun?fun.map(trimKeys):fun; cd=cd?cd.map(trimKeys):cd; fd=fd?fd.map(trimKeys):fd;
+
+    if(k) mergeKpis(k);
+
+    if(ld){
+      // Guarda os dados brutos de todos os meses. O cálculo por dia é feito
+      // sob demanda em computeLeadsDiarios(), filtrando pelo mês certo —
+      // assim funciona pra qualquer período selecionado, não só o do load.
+      const validDays=ld.filter(r=>/^\d{2}\/\d{2}$/.test((r['Data']||r['data']||'').trim()));
+      DB.leadsDiariosAll=validDays;
+      DB.leadsDiariosMeta=validDays.length?(Number(validDays[0]['Meta Diária']||validDays[0]['meta'])||15):15;
+    }
+
+    if(lm){
+      const validMonths=lm.filter(r=>{const m=(r['Mês']||r['mes']||'').trim();return /^[A-Za-zÀ-ú]{3}\/\d{2}$/.test(m);});
+      if(validMonths.length>0){
+        // Ordena cronologicamente e remove meses futuros sem dados
+        const mesOrder={'Jan':1,'Fev':2,'Mar':3,'Abr':4,'Mai':5,'Jun':6,'Jul':7,'Ago':8,'Set':9,'Out':10,'Nov':11,'Dez':12};
+        const sortedMonths=validMonths
+          .filter(r=>{
+            const ai=Number(r['Área Incrível']||0);
+            const tr=Number(r['Terrenistas']||0);
+            const ma=Number(r['Mais Armazém']||0);
+            const cl=Number(r['Centro Logístico']||0);
+            const m=(r['Mês']||'').trim().split('/')[0];
+            // Inclui apenas meses com dados ou o mês atual
+            return ai>0||tr>0||ma>0||cl>0||((r['Mês']||'').includes('Jul')&&new Date().getMonth()===6);
+          })
+          .sort((a,b)=>{
+            const [mA,yA]=(a['Mês']||'').trim().split('/');
+            const [mB,yB]=(b['Mês']||'').trim().split('/');
+            const yDiff=Number(yA)-Number(yB);
+            return yDiff!==0?yDiff:(mesOrder[mA]||0)-(mesOrder[mB]||0);
+          });
+        DB.leads_mensais.labels=sortedMonths.map(r=>(r['Mês']||r['mes']||'').trim());
+        DB.leads_mensais['Área Incrível']=sortedMonths.map(r=>Number(r['Área Incrível']||r['area_incrivel'])||0);
+        DB.leads_mensais['Terrenistas']=sortedMonths.map(r=>Number(r['Terrenistas']||r['terrenistas'])||0);
+        DB.leads_mensais['Mais Armazém']=sortedMonths.map(r=>Number(r['Mais Armazém']||r['mais_armazem'])||0);
+        DB.leads_mensais['Centro Logístico']=sortedMonths.map(r=>Number(r['Centro Logístico']||r['centro_logistico'])||0);
+      }
+    }
+
+    if(plt){
+      const validPlat=plt.filter(r=>{
+        const p=r['Plataforma']||r['plataforma']||'';
+        return p.trim().length>0&&!p.includes('Plataforma')&&!p.includes('linha');
+      });
+      if(validPlat.length>0){
+        DB.plataformasAll=validPlat.map(r=>({
+          mes:(r['Mês']||r['mes']||'').trim(),
+          empresa:(r['Empresa']||r['empresa']||'').trim(),
+          p:(r['Plataforma']||r['plataforma']||'').trim(),
+          leads:Number(r['Leads']||r['leads'])||0,
+        }));
+      }
+    }
+
+    if(camp){
+      const validCamp=camp.filter(r=>{const c=r['Campanha']||r['campanha']||'';return c.trim().length>0&&!c.includes('Campanha')&&!c.includes('linha');});
+      if(validCamp.length>0){
+        // Guarda todas as campanhas com o mês para filtrar depois
+        DB.campanhasAll=validCamp.map(r=>({
+          mes:(r['Mês']||r['mes']||'').trim(),
+          campanha:(r['Campanha']||r['campanha']||'').trim(),
+          empresa:(r['Empresa']||r['empresa']||'').trim(),
+          plataforma:(r['Plataforma']||r['plataforma']||'').trim(),
+          investimento:(r['Investimento (R$)']||r['Investimento']||r['investimento']||'R$0').toString().trim(),
+          impressoes:(r['Impressões']||r['impressoes']||'—').toString().trim(),
+          cliques:(r['Cliques']||r['cliques']||'—').toString().trim(),
+          ctr:(r['CTR (%)']||r['CTR']||r['ctr']||'—').toString().trim(),
+          leads:Number(r['Leads']||r['leads'])||0,
+          cpl:(r['CPL (R$)']||r['cpl']||'—').toString().trim(),
+          vendas:parseBR(r['Vendas']||r['vendas']),
+          receita:parseBR(r['Receita (R$)']||r['receita']),
+          roi:parseBR(r['ROI']||r['roi']),
+        }));
+        DB.campanhas=DB.campanhasAll;
+      }
+    }
+
+    // Funil — lê dados reais da aba Funil
+    if(fun){
+      // mesMap gerado dinamicamente
+  const mesesAbrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesMap={};
+  const hoje2=new Date();
+  for(let i=0;i<24;i++){const d=new Date(hoje2.getFullYear(),hoje2.getMonth()-i,1);const k=mesesAbrev[d.getMonth()]+' '+d.getFullYear();const v=mesesAbrev[d.getMonth()]+'/'+String(d.getFullYear()).slice(2);mesMap[k]=v;}
+      const empresasValidas=['Área Incrível','Terrenistas'];
+      const validFunil=fun.filter(r=>empresasValidas.includes((r['Empresa']||'').trim()));
+      if(validFunil.length>0){
+        // Gera lista de períodos dinamicamente (mês atual + 12 meses anteriores)
+  const mesesAbrevKpi=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const hojeKpi=new Date();
+  const periods=[];
+  for(let i=0;i<13;i++){const d=new Date(hojeKpi.getFullYear(),hojeKpi.getMonth()-i,1);periods.push(mesesAbrevKpi[d.getMonth()]+' '+d.getFullYear());}
+        periods.forEach(period=>{
+          const mesCsv=mesMap[period];
+          const rows=validFunil.filter(r=>(r['Mês']||'').trim()===mesCsv);
+          if(rows.length>0){
+            DB.funil[period]=rows.map(r=>({
+              empresa:(r['Empresa']||'').trim(),
+              mql:Number(r['MQL'])||0,
+              sql:Number(r['SQL'])||0,
+              oportunidades:Number(r['Oportunidades'])||0,
+              negociacoes:Number(r['Negociações']||r['Negociacoes'])||0,
+              vendas:Number(r['Vendas'])||0,
+              receita:parseBR(r['Receita (R$)']||r['Receita']),
+              visita_agendada:Number(r['Visita Agendada'])||0,
+              visita_realizada:Number(r['Visita Realizada'])||0,
+              em_atendimento:Number(r['Em Atendimento']||r['Análise de Crédito']||r['Analise de Credito'])||0,
+              pre_analise:Number(r['Pré Análise']||r['Pre Analise'])||0,
+              qualificado_tr:Number(r['Qualificado'])||0,
+              perdido:Number(r['Perdido'])||0,
+              dia_1:Number(r['Dia 1'])||0,
+              dia_3:Number(r['Dia 3'])||0,
+              dia_7:Number(r['Dia 7'])||0,
+              dia_15:Number(r['Dia 15'])||0,
+              nutricao:Number(r['Nutrição']||r['Nutricao'])||0,
+              aguardando_atendimento:Number(r['Aguardando Atendimento'])||0,
+              aguardando_kmz:Number(r['Aguardando KMZ'])||0,
+            }));
+          }
+        });
+      }
+    }
+
+    if(cd){
+      // Aceita 3 formatos de data: dd/MM/aaaa, aaaa-mm-dd, e dd/MM sem ano
+      // (esse último é o formato real que a planilha usa hoje). Quando não
+      // tem ano, guardamos só "dd/MM" e o ano é inferido na hora de filtrar
+      // (a partir da data "De" escolhida no filtro) — mesma lógica do Funil Diário.
+      DB.camp_diarias=cd
+        .filter(r=>{
+          const d=(r['Data']||'').trim();
+          return /^\d{2}\/\d{2}\/\d{4}$/.test(d)||/^\d{4}-\d{2}-\d{2}$/.test(d)||/^\d{2}\/\d{2}$/.test(d);
+        })
+        .map(r=>{
+          let rawDate=(r['Data']||'').trim();
+          if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
+            const [y,m,d]=rawDate.split('-');
+            rawDate=`${d}/${m}/${y}`;
+          }
+          return {
+            data:rawDate,
+            campanha:(r['Campanha']||r['campanha']||'').trim(),
+            empresa:(r['Empresa']||r['empresa']||'').trim(),
+            plataforma:(r['Plataforma']||r['plataforma']||'').trim(),
+            investimento:parseBR(r['Investimento (R$)']||r['investimento']),
+            leads:Number(r['Leads']||r['leads'])||0,
+          };
+        });
+    }
+
+    if(fd){
+      // Funil Diário: uma linha por dia/empresa, só existe a partir de quando essa
+      // aba foi criada — meses anteriores não têm esse detalhamento (ver nota no
+      // renderFunnel/renderKPIs, que caem pro total mensal quando não há dado diário).
+      // Aceita tanto "dd/MM" (formato do webhook) quanto "yyyy-mm-dd" (Google Sheets
+      // às vezes auto-formata datas digitadas manualmente nesse padrão).
+      DB.funilDiarioAll=fd
+        .filter(r=>{
+          const d=(r['Data']||'').trim();
+          return /^\d{2}\/\d{2}$/.test(d)||/^\d{4}-\d{2}-\d{2}$/.test(d);
+        })
+        .map(r=>{
+          let data=(r['Data']||'').trim();
+          if(/^\d{4}-\d{2}-\d{2}$/.test(data)){
+            const [,m,d]=data.split('-');
+            data=`${d}/${m}`;
+          }
+          return {
+            data,
+            empresa:(r['Empresa']||'').trim(),
+            mql:Number(r['MQL'])||0,
+            sql:Number(r['SQL'])||0,
+            oportunidades:Number(r['Oportunidades'])||0,
+            negociacoes:Number(r['Negociações']||r['Negociacoes'])||0,
+            vendas:Number(r['Vendas'])||0,
+            receita:parseBR(r['Receita']||r['Receita (R$)']),
+            visita_agendada:Number(r['Visita Agendada'])||0,
+            visita_realizada:Number(r['Visita Realizada'])||0,
+            em_atendimento:Number(r['Em Atendimento'])||0,
+            pre_analise:Number(r['Pré Análise']||r['Pre Analise'])||0,
+            qualificado_tr:Number(r['Qualificado'])||0,
+            perdido:Number(r['Perdido'])||0,
+            dia_1:Number(r['Dia 1'])||0,
+            dia_3:Number(r['Dia 3'])||0,
+            dia_7:Number(r['Dia 7'])||0,
+            dia_15:Number(r['Dia 15'])||0,
+            nutricao:Number(r['Nutrição']||r['Nutricao'])||0,
+            aguardando_atendimento:Number(r['Aguardando Atendimento'])||0,
+            aguardando_kmz:Number(r['Aguardando KMZ'])||0,
+          };
+        });
+    }
+
+    const now=new Date();
+    document.getElementById('lastUpdate').textContent='Atualizado às '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    document.getElementById('lastUpdate').textContent='Erro ao carregar dados';
+  }
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('app').style.display='block';
+  onEmpresaChange();
+}
+
+function mergeKpis(rows){
+  const empresasValidas=['Área Incrível','Terrenistas'];
+  // mesMap gerado dinamicamente
+  const mesesAbrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesMap={};
+  const hoje2=new Date();
+  for(let i=0;i<24;i++){const d=new Date(hoje2.getFullYear(),hoje2.getMonth()-i,1);const k=mesesAbrev[d.getMonth()]+' '+d.getFullYear();const v=mesesAbrev[d.getMonth()]+'/'+String(d.getFullYear()).slice(2);mesMap[k]=v;}
+  const allRows=rows.filter(r=>empresasValidas.includes((r['Empresa']||r['empresa']||'').trim()));
+  // Gera lista de períodos dinamicamente (mês atual + 12 meses anteriores)
+  const mesesAbrevKpi=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const hojeKpi=new Date();
+  const periods=[];
+  for(let i=0;i<13;i++){const d=new Date(hojeKpi.getFullYear(),hojeKpi.getMonth()-i,1);periods.push(mesesAbrevKpi[d.getMonth()]+' '+d.getFullYear());}
+  periods.forEach(period=>{
+    const mesCsv=mesMap[period];
+    const rowsDoMes=allRows.filter(r=>(r['Mês']||r['mes']||'').trim()===mesCsv);
+    if(rowsDoMes.length>0){
+      DB.kpis[period]=rowsDoMes.map(r=>({
+        empresa:(r['Empresa']||r['empresa']||'').trim(),
+        leads_hoje:parseBR(r['Leads Hoje']||r['leads_hoje']),
+        leads_mes:parseBR(r['Leads Mês']||r['leads_mes']),
+        meta_mes:parseBR(r['Meta Mês']||r['meta_mes']),
+        investimento:parseBR(r['Investimento (R$)']||r['investimento']),
+        cpl:parseBR(r['CPL (R$)']||r['cpl']),
+        cac:parseBR(r['CAC (R$)']||r['cac']),
+        roi:parseBR(r['ROI']||r['roi']),
+        taxa:parseBR(r['Taxa Conv. (%)']||r['taxa_conversao']),
+        pipeline:parseBR(r['Pipeline (R$)']||r['pipeline']),
+        receita:parseBR(r['Receita (R$)']||r['receita']),
+      }));
+    }
+  });
+}
+
+function onEmpresaChange(){
+  const s=getState();
+  const mesesAbrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesMap={};
+  const hoje2=new Date();
+  for(let i=0;i<24;i++){const d=new Date(hoje2.getFullYear(),hoje2.getMonth()-i,1);const k=mesesAbrev[d.getMonth()]+' '+d.getFullYear();const v=mesesAbrev[d.getMonth()]+'/'+String(d.getFullYear()).slice(2);mesMap[k]=v;}
+  const mesCsv=mesMap[s.period]||'';
+  const sel=document.getElementById('fCamp');
+  const prev=sel.value;
+  sel.innerHTML='<option>Todas as campanhas</option>';
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const fonte=(DB.campanhasAll||DB.campanhas).filter(c=>(!c.mes||c.mes===mesCsv)&&selectedEmpresas.includes(c.empresa));
+  [...new Set(fonte.map(c=>c.campanha))].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  if([...sel.options].some(o=>o.value===prev))sel.value=prev;
+  applyFilters();
+}
+
+function onPeriodChange(){
+  // Mostra filtro de data só para Área Incrível e Terrenistas
+  applyFilters();
+}
+
+function getDateRange(){
+  const from=document.getElementById('fDateFrom').value;
+  const to=document.getElementById('fDateTo').value;
+  return{from,to};
+}
+
+function applyFilters(){
+  const s=getState();
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const kpis=(DB.kpis[s.period]||[]).filter(r=>selectedEmpresas.includes(r.empresa));
+  // Filtra plataformas pelo período
+  const mesMap2={'Jul 2026':'Jul/26','Jun 2026':'Jun/26','Mai 2026':'Mai/26','Abr 2026':'Abr/26','Mar 2026':'Mar/26','Fev 2026':'Fev/26','Jan 2026':'Jan/26'};
+  const mesCsvPlat=mesMap2[s.period]||'';
+  const platSource=DB.plataformasAll||[];
+  const platFiltrado=platSource
+    .filter(r=>!r.mes||r.mes===mesCsvPlat)
+    .filter(r=>!r.empresa||getSelectedEmpresas(s.empresa).includes(r.empresa))
+    .filter(r=>r.leads>0);
+  // Agrupa por plataforma somando leads
+  const platMap={};
+  platFiltrado.forEach(r=>{platMap[r.p]=(platMap[r.p]||0)+r.leads;});
+  const CORES={'Meta Ads':'#2563EB','Google Ads':'#DC2626','LinkedIn Ads':'#7C3AED','WhatsApp':'#059669','Orgânico':'#0891B2','TikTok Ads':'#D97706','Indicação':'#9CA3AF'};
+  const platDataAll=Object.entries(platMap).map(([p,leads])=>({p,leads,cor:CORES[p]||'#9CA3AF'})).sort((a,b)=>b.leads-a.leads);
+  const platData=platDataAll.filter(r=>s.plat==='Todas as plataformas'||r.p===s.plat);
+  // Filtra campanhas pelo período selecionado
+const mesMap={'Jul 2026':'Jul/26','Jun 2026':'Jun/26','Mai 2026':'Mai/26','Abr 2026':'Abr/26','Mar 2026':'Mar/26','Fev 2026':'Fev/26','Jan 2026':'Jan/26'};
+const mesCsv=mesMap[s.period]||'';
+const campBase=(DB.campanhasAll||DB.campanhas).filter(c=>!c.mes||c.mes===mesCsv||mesCsv==='');
+const campData=campBase.filter(c=>getSelectedEmpresas(s.empresa).includes(c.empresa)&&(s.plat==='Todas as plataformas'||c.plataforma===s.plat)&&(s.camp==='Todas as campanhas'||c.campanha===s.camp));
+  // Atualiza dropdown de campanhas conforme período e empresa selecionados
+  const selCamp=document.getElementById('fCamp');
+  const prevCamp=selCamp.value;
+  selCamp.innerHTML='<option>Todas as campanhas</option>';
+  const fonteCamp=(DB.campanhasAll||DB.campanhas).filter(c=>(!c.mes||c.mes===mesCsv)&&getSelectedEmpresas(s.empresa).includes(c.empresa)&&(s.plat==='Todas as plataformas'||c.plataforma===s.plat));
+  [...new Set(fonteCamp.map(c=>c.campanha))].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;selCamp.appendChild(o);});
+  if([...selCamp.options].some(o=>o.value===prevCamp))selCamp.value=prevCamp;
+
+  // Esconde Performance por Campanha e Alertas para Área Incrível/Terrenistas
+  // — EXCETO quando o filtro de data está ativo, caso em que mostramos o
+  // detalhamento por campanha dentro do intervalo escolhido (dado vem de
+  // Campanhas Diárias, que tem granularidade diária real).
+  const dateFilterOn=isDateFilterActive(s);
+  const campDiariasFiltrado=dateFilterOn?getCampDiariasFiltrado(s):null;
+  const funilDiarioFiltrado=dateFilterOn?getFunilDiarioFiltrado(s):null;
+  const campSection=document.getElementById('campAlertsSection');
+  const campSectionTitle=document.getElementById('campSectionTitle');
+  const onlyAiTr=s.empresa&&s.empresa.split('|').every(e=>e==='Área Incrível'||e==='Terrenistas');
+  if(campSection) campSection.style.display=(onlyAiTr&&!dateFilterOn)?'none':'block';
+  if(campSectionTitle) campSectionTitle.textContent=dateFilterOn?'Performance por campanha — período selecionado':'Performance por campanha';
+
+  // Oculta funil quando AI e Terrenistas estão selecionados juntos (funis distintos)
+  const selectedArr=getSelectedEmpresas(s.empresa);
+  const hasAI=selectedArr.includes('Área Incrível');
+  const hasTR=selectedArr.includes('Terrenistas');
+  const hasOthers=selectedArr.some(e=>e!=='Área Incrível'&&e!=='Terrenistas');
+  const funnelSection=document.getElementById('funnelSection');
+  if(funnelSection){
+    const hideFunnel=hasAI&&hasTR&&!hasOthers;
+    funnelSection.style.display=hideFunnel?'none':'block';
+  }
+  document.getElementById('subTitle').textContent=s.empresa?getSelectedEmpresas(s.empresa).join(' · '):'Área Incrível · Terrenistas';
+  document.getElementById('periodLabel').textContent=dateFilterOn?(document.getElementById('fDateFrom').value.split('-').reverse().join('/')+' – '+document.getElementById('fDateTo').value.split('-').reverse().join('/')):s.period;
+  const leadsDiariosFiltrado=dateFilterOn?getLeadsDiariosFiltrado(s):null;
+  renderKPIs(kpis,s,campDiariasFiltrado,funilDiarioFiltrado,leadsDiariosFiltrado);
+  if(dateFilterOn){
+    const from=document.getElementById('fDateFrom').value;
+    const to=document.getElementById('fDateTo').value;
+    const {fromPrev,toPrev}=getIntervaloMesAnterior(from,to);
+    const selectedEmpresas=getSelectedEmpresas(s.empresa);
+    const anoPrev=fromPrev.getFullYear();
+    const campPrev=filtrarCampDiarias(selectedEmpresas, fromPrev, toPrev, anoPrev);
+    const funilPrev=agregarFunilDiario(selectedEmpresas, fromPrev, toPrev, anoPrev);
+    renderCompare(kpis,s,campDiariasFiltrado,funilDiarioFiltrado,campPrev,funilPrev);
+  } else {
+    renderCompare(kpis,s);
+  }
+  renderDaily(s);renderMonthly(s);
+  renderPlatform(platData);renderFunnel(kpis,s,funilDiarioFiltrado,campDiariasFiltrado,leadsDiariosFiltrado);renderCacRoi(kpis);
+  if(!renderDailyEmpresaTable(s,funilDiarioFiltrado)) renderEmpresaTable(kpis,s);
+  if(dateFilterOn) renderCampTableDiario(campDiariasFiltrado); else renderCampTable(campData);
+  renderAlerts(kpis,campData,dateFilterOn);
+}
+
+function getFunilData(s){
+  if(DB.funil&&DB.funil[s.period]){
+    return DB.funil[s.period].filter(r=>getSelectedEmpresas(s.empresa).includes(r.empresa));
+  }
+  return null;
+}
+
+// Terrenistas não usa a coluna SQL — o equivalente de "lead qualificado" pra ela
+// é a coluna Qualificado (funil próprio: MQL → Pré Análise → Qualificado → Negociação).
+// Sem isso, "Qualificados" somava SQL puro e ficava sempre 0 pra Terrenistas.
+function qualificadosDe(r){
+  return r.empresa==='Terrenistas' ? (r.qualificado_tr||0) : (r.sql||0);
+}
+
+function renderKPIs(kpis,s,campFiltrado,funilFiltrado,leadsDiariosFiltrado){
+  const dateFilterOn=!!campFiltrado;
+  const tl=kpis.reduce((a,r)=>a+Number(r.leads_hoje),0);
+  // Leads sempre vem do GHL (Leads Diários), com ou sem filtro de data — é o
+  // volume real do CRM. Investimento continua do Meta (Campanhas Diárias),
+  // única fonte de gasto que existe. CPL cruza as duas de propósito.
+  let lm,inv;
+  if(dateFilterOn){
+    lm=leadsDiariosFiltrado;
+    inv=campFiltrado.reduce((a,r)=>a+r.investimento,0);
+  } else {
+    lm=kpis.reduce((a,r)=>a+Number(r.leads_mes),0);
+    inv=kpis.reduce((a,r)=>a+Number(r.investimento),0);
+  }
+  const meta=kpis.reduce((a,r)=>a+Number(r.meta_mes),0);
+  const cpl=lm>0?inv/lm:0;
+
+  // Vendas/Receita: usa o período exato (Funil Diário) quando o filtro de
+  // data está ativo e há dado real ali — nunca mistura investimento do
+  // período com vendas/receita do mês (era esse o bug: CAC saía igual ao
+  // investimento porque dividia por uma estimativa de mês inteiro).
+  // Sem dado real no período, mostra "sem dado" em vez de estimar errado.
+  let vd, rec, vendasRealNoPeriodo;
+  if(dateFilterOn){
+    vendasRealNoPeriodo=funilFiltrado&&funilFiltrado.some(r=>r.vendas>0||r.receita>0);
+    vd=funilFiltrado?funilFiltrado.reduce((a,r)=>a+(r.vendas||0),0):0;
+    rec=funilFiltrado?funilFiltrado.reduce((a,r)=>a+(r.receita||0),0):0;
+  } else {
+    vd=kpis.reduce((a,r)=>a+Math.round(Number(r.leads_mes)*Number(r.taxa)/100),0);
+    rec=kpis.reduce((a,r)=>a+Number(r.receita),0);
+    vendasRealNoPeriodo=true; // n/a, não é modo período
+  }
+  const cac=vd>0?inv/vd:0;
+  const roi=inv>0?rec/inv:0;
+  const tx=lm>0?vd/lm*100:0;
+  const pip=kpis.reduce((a,r)=>a+Number(r.pipeline),0);
+  const recMes=kpis.reduce((a,r)=>a+Number(r.receita),0);
+  const mp=meta>0?Math.round(lm/meta*100):0;
+
+  // MQL e SQL: usa Funil Diário se o período filtrado tiver dado (mais preciso);
+  // senão cai pro total do mês (Funil); senão estimativa.
+  let mql,sql,mqlPct,sqlPct;
+  const qualificadosNoPeriodo=!!funilFiltrado;
+  const funRows=funilFiltrado||getFunilData(s);
+  if(funRows&&funRows.length>0){
+    mql=funRows.reduce((a,r)=>a+r.mql,0);
+    sql=funRows.reduce((a,r)=>a+qualificadosDe(r),0);
+    mqlPct=lm>0?Math.round(mql/lm*100):0;
+    sqlPct=mql>0?Math.round(sql/mql*100):0;
+  } else {
+    mql=Math.round(lm*MQL_RATE);
+    sql=Math.round(lm*SQL_RATE);
+    mqlPct=Math.round(MQL_RATE*100);
+    sqlPct=Math.round(SQL_RATE/MQL_RATE*100);
+  }
+
+  // Dados do mês anterior para comparar
+  const s2=getState();
+  // prevMap gerado dinamicamente
+  const mesesAbrevPrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const hojePrev=new Date();
+  const prevMap2={};
+  for(let i=0;i<13;i++){const d=new Date(hojePrev.getFullYear(),hojePrev.getMonth()-i,1);const curr=mesesAbrevPrev[d.getMonth()]+' '+d.getFullYear();const dp=new Date(hojePrev.getFullYear(),hojePrev.getMonth()-i-1,1);const prev=mesesAbrevPrev[dp.getMonth()]+' '+dp.getFullYear();prevMap2[curr]=prev;}
+  const prevPeriod2=prevMap2[s2.period]||'Mai 2026';
+  const prevKpis2=(DB.kpis[prevPeriod2]||[]).filter(r=>getSelectedEmpresas(s2.empresa).includes(r.empresa));
+  const prevInv2=prevKpis2.reduce((a,r)=>a+Number(r.investimento),0);
+  const prevLm2=prevKpis2.reduce((a,r)=>a+Number(r.leads_mes),0);
+  const prevVd2=prevKpis2.reduce((a,r)=>a+Math.round(Number(r.leads_mes)*Number(r.taxa)/100),0);
+  const prevRec2=prevKpis2.reduce((a,r)=>a+Number(r.receita),0);
+  const prevCpl2=prevLm2>0?prevInv2/prevLm2:0;
+  const prevCac2=prevVd2>0?prevInv2/prevVd2:0;
+  const prevRoi2=prevInv2>0?prevRec2/prevInv2:0;
+
+  function varSeta(curr,prev,upGood){
+    if(!prev||prev===0) return '<span class="mu">—</span>';
+    const d=Math.round((curr-prev)/prev*100);
+    if(d===0) return '<span class="mu">= igual ao ant.</span>';
+    const good=upGood?d>0:d<0;
+    const cls=good?'up':'dn';
+    const arrow=d>0?'↑':'↓';
+    return '<span class="'+cls+'">'+arrow+' '+Math.abs(d)+'% vs ant.</span>';
+  }
+
+  const diasNoMes=new Date().getDate();
+  const mediaLeadsDia=diasNoMes>1&&lm>0?Math.round(lm/diasNoMes):0;
+  const leadsHojeSeta=mediaLeadsDia>0?(tl>mediaLeadsDia?'<span class="up">↑ acima da média</span>':tl<mediaLeadsDia?'<span class="dn">↓ abaixo da média</span>':'<span class="mu">= média do mês</span>'):'<span class="mu">Hoje</span>';
+
+  document.getElementById('kpiGrid').innerHTML=[
+    {l:'Leads hoje',v:tl,s:leadsHojeSeta,cl:''},
+    {l:dateFilterOn?'Leads no período':'Leads do mês',v:lm,s:dateFilterOn?'<span class="mu">Leads Diários</span>':'Meta '+meta+' · <b style="color:#111827">'+mp+'%</b>',cl:''},
+    {l:'Qualificados',v:sql,s:((dateFilterOn&&!qualificadosNoPeriodo)?'<span class="mu">Mês todo · </span>':'')+'<span style="color:#10B981">'+sqlPct+'% dos leads</span>',cl:'sql'},
+    {l:dateFilterOn?'Investimento no período':'Investimento',v:fmtK(inv),s:dateFilterOn?'<span class="mu">Campanhas Diárias</span>':varSeta(inv,prevInv2,true),cl:''},
+    {l:'CPL médio',v:fmtBRL(cpl),s:dateFilterOn?'<span class="mu">No período selecionado</span>':varSeta(cpl,prevCpl2,false),cl:''},
+    {l:'CAC médio',v:cac>0?fmtBRL(cac):'—',s:dateFilterOn?(cac>0?'<span class="mu">No período selecionado</span>':'<span class="mu">Sem venda no período</span>'):(cac>0?varSeta(cac,prevCac2,false):'<span class="mu">Sem vendas</span>'),cl:''},
+    {l:'ROI médio',v:roi>0?roi.toFixed(2)+'x':'—',s:dateFilterOn?(roi>0?'<span class="mu">No período selecionado</span>':'<span class="mu">Sem receita no período</span>'):(roi>0?varSeta(roi,prevRoi2,true):'<span class="mu">Sem receita</span>'),cl:''},
+    {l:'Tx. conversão',v:tx.toFixed(1)+'%',s:'<span class="mu">Lead → cliente'+(dateFilterOn?' (período)':'')+'</span>',cl:''},
+    {l:'Pipeline',v:pip>0?fmtK(pip):fmtK(dateFilterOn?rec:recMes),s:pip>0?'<span class="mu">Em negociação (mês)</span>':(dateFilterOn?'<span class="mu">Receita acumulada (período)</span>':'<span class="mu">Receita acumulada (mês)</span>'),cl:'hi'},
+  ].map(k=>'<div class="kc '+k.cl+'"><p class="kl">'+k.l+'</p><p class="kv">'+k.v+'</p><p class="ks">'+k.s+'</p></div>').join('');
+}
+
+function renderCompare(kpis,s,campFiltrado,funilFiltrado,campPrev,funilPrev){
+  const dateFilterOn=!!campFiltrado;
+  let c,p,sqlCurr,sqlPrev,label;
+
+  if(dateFilterOn){
+    // Compara o mesmo intervalo de dias, um mês antes — comparação justa
+    // mesmo com o mês corrente ainda em andamento.
+    c={
+      lm:campFiltrado.reduce((a,r)=>a+r.leads,0),
+      inv:campFiltrado.reduce((a,r)=>a+r.investimento,0),
+      rec:funilFiltrado?funilFiltrado.reduce((a,r)=>a+(r.receita||0),0):0,
+    };
+    p={
+      lm:(campPrev||[]).reduce((a,r)=>a+r.leads,0),
+      inv:(campPrev||[]).reduce((a,r)=>a+r.investimento,0),
+      rec:funilPrev?funilPrev.reduce((a,r)=>a+(r.receita||0),0):0,
+    };
+    sqlCurr=funilFiltrado?funilFiltrado.reduce((a,r)=>a+qualificadosDe(r),0):0;
+    sqlPrev=funilPrev?funilPrev.reduce((a,r)=>a+qualificadosDe(r),0):0;
+    label=`vs. mesmo período (mês ant.)`;
+    const compareTitleEl=document.getElementById('compareTitle');
+    if(compareTitleEl){
+      const fromVal=document.getElementById('fDateFrom').value;
+      const toVal=document.getElementById('fDateTo').value;
+      const {fromPrev,toPrev}=getIntervaloMesAnterior(fromVal,toVal);
+      const fromFmt=fromVal.split('-').reverse().join('/');
+      const toFmt=toVal.split('-').reverse().join('/');
+      const fromPrevFmt=String(fromPrev.getDate()).padStart(2,'0')+'/'+String(fromPrev.getMonth()+1).padStart(2,'0')+'/'+fromPrev.getFullYear();
+      const toPrevFmt=String(toPrev.getDate()).padStart(2,'0')+'/'+String(toPrev.getMonth()+1).padStart(2,'0')+'/'+toPrev.getFullYear();
+      compareTitleEl.textContent=`${fromFmt}–${toFmt} vs. ${fromPrevFmt}–${toPrevFmt}`;
+    }
+  } else {
+    const prevMap={'Jul 2026':'Jun 2026','Jun 2026':'Mai 2026','Mai 2026':'Abr 2026','Abr 2026':'Mar 2026','Mar 2026':'Fev 2026','Fev 2026':'Jan 2026','Jan 2026':'Jan 2026'};
+    const prevPeriod=prevMap[s.period]||'Mai 2026';
+    const prev=(DB.kpis[prevPeriod]||DB.kpis['Jun 2026']).filter(r=>getSelectedEmpresas(s.empresa).includes(r.empresa));
+    const calc=arr=>({lm:arr.reduce((a,r)=>a+Number(r.leads_mes),0),inv:arr.reduce((a,r)=>a+Number(r.investimento),0),rec:arr.reduce((a,r)=>a+Number(r.receita),0)});
+    c=calc(kpis); p=calc(prev);
+
+    const funCurr=getFunilData(s);
+    const funPrevRows=DB.funil&&DB.funil[prevPeriod]?DB.funil[prevPeriod].filter(r=>getSelectedEmpresas(s.empresa).includes(r.empresa)):null;
+    sqlCurr=funCurr?funCurr.reduce((a,r)=>a+qualificadosDe(r),0):Math.round(c.lm*SQL_RATE);
+    sqlPrev=funPrevRows?funPrevRows.reduce((a,r)=>a+qualificadosDe(r),0):Math.round(p.lm*SQL_RATE);
+    label='vs ant.';
+    const compareTitleElNormal=document.getElementById('compareTitle');
+    if(compareTitleElNormal) compareTitleElNormal.textContent='Atual vs. mês anterior';
+  }
+
+  // Mês atual sempre em cinza (ainda em andamento) — só se aplica na
+  // comparação mês-a-mês. Com filtro de data ativo, os dois intervalos têm
+  // o mesmo tamanho, então a comparação já é justa e usa cor normal.
+  const isCurrentMonth = !dateFilterOn && s.period === document.getElementById('fPeriod').options[0].value;
+  const items=[
+    {l:'Leads',curr:c.lm,prev:p.lm,fmt:v=>v,up:true},
+    {l:'SQL',curr:sqlCurr,prev:sqlPrev,fmt:v=>v,up:true},
+    {l:'Investimento',curr:c.inv,prev:p.inv,fmt:fmtK,up:true}, // maior = melhor
+    {l:'CPL',curr:c.lm>0?c.inv/c.lm:0,prev:p.lm>0?p.inv/p.lm:0,fmt:fmtBRL,up:false}, // menor = melhor
+    {l:'ROI',curr:c.inv>0?c.rec/c.inv:0,prev:p.inv>0?p.rec/p.inv:0,fmt:v=>'R$'+v.toFixed(1),up:true},
+  ];
+  document.getElementById('compGrid').innerHTML=items.map(i=>{
+    const d=i.prev>0?Math.round((i.curr-i.prev)/i.prev*100):0;
+    const good=i.up?d>0:d<0;
+    // Mês atual: mostra seta mas em cinza. Meses passados/período com filtro: verde/vermelho
+    const cls=isCurrentMonth?'mu':(good?'up':'dn');
+    const arrow=d>0?'↑ +':'↓ −';
+    const pctLabel=i.prev>0?(arrow+Math.abs(d)+'% '+label):'—';
+    return`<div class="ck"><p class="cl2">${i.l}</p><p class="cv">${i.fmt(i.curr)}</p><p class="cd ${cls}">${pctLabel}</p></div>`;
+  }).join('');
+}
+
+function renderDaily(s){
+  destroyChart('daily');
+  const dd=computeLeadsDiarios(s.period);
+  const empresas=getSelectedEmpresas(s.empresa);
+  document.getElementById('lgDaily').innerHTML=empresas.map(e=>`<span><span class="ld" style="background:${COLORS[e]}"></span>${e}</span>`).join('')+`<span><span class="ld" style="background:transparent;border:1px dashed #D1D5DB"></span>Meta</span>`;
+
+  // Se o filtro de datas estiver ativo e o intervalo cair dentro do mês exibido,
+  // recorta o gráfico só pros dias selecionados em vez do mês inteiro.
+  let diaIni=1,diaFim=31;
+  if(isDateFilterActive(s)){
+    const from=document.getElementById('fDateFrom').value;
+    const to=document.getElementById('fDateTo').value;
+    const mesesAbrev=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const mesIdx=mesesAbrev.indexOf((s.period||'').split(' ')[0]);
+    const [fy,fm,fd]=from.split('-').map(Number);
+    const [ty,tm,td]=to.split('-').map(Number);
+    if((fm-1)===mesIdx) diaIni=fd;
+    if((tm-1)===mesIdx) diaFim=td;
+  }
+  const labels=Array.from({length:31},(_,i)=>i+1).slice(diaIni-1,diaFim);
+  charts.daily=new Chart(document.getElementById('c1'),{type:'line',data:{labels,datasets:[...empresas.map(e=>({label:e,data:(dd[e]||[]).slice(diaIni-1,diaFim),borderColor:COLORS[e],backgroundColor:COLORS[e]+'12',tension:.35,pointRadius:0,borderWidth:2,fill:true})),{label:'Meta',data:new Array(labels.length).fill(dd.meta||15),borderColor:'#D1D5DB',borderDash:[4,4],pointRadius:0,borderWidth:1,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:10},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10}},grid:{color:gc},beginAtZero:true}}}});
+}
+
+function renderMonthly(s){
+  destroyChart('monthly');
+  const empresas=getSelectedEmpresas(s.empresa);
+  document.getElementById('lgMonthly').innerHTML=empresas.map(e=>`<span><span class="ld" style="background:${COLORS[e]}"></span>${e}</span>`).join('');
+  charts.monthly=new Chart(document.getElementById('c2'),{type:'bar',data:{labels:DB.leads_mensais.labels,datasets:empresas.map(e=>({label:e,data:DB.leads_mensais[e],backgroundColor:COLORS[e],borderRadius:2}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:9},autoSkip:false,maxRotation:45},grid:{display:false}},y:{ticks:{color:tc,font:{size:10}},grid:{color:gc},beginAtZero:true}}}});
+}
+
+function renderPlatform(data){
+  destroyChart('plat');
+  const h=Math.max(180,data.length*40+60);
+  document.getElementById('platWrap').style.height=h+'px';
+  charts.plat=new Chart(document.getElementById('c3'),{type:'bar',data:{labels:data.map(r=>r.p),datasets:[{data:data.map(r=>r.leads),backgroundColor:data.map(r=>r.cor),borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc},beginAtZero:true},y:{ticks:{color:tc,font:{size:10}},grid:{display:false}}}}});
+}
+
+function renderFunnel(kpis,s,funilFiltrado,campFiltrado,leadsDiariosFiltrado){
+  const dateFilterOnFunil=!!campFiltrado;
+  // Leads sempre do GHL (Leads Diários) — mesma fonte da Visão Geral, nunca
+  // do Meta (Campanhas Diárias), pra não mostrar dois números de "Leads"
+  // diferentes na mesma tela pro mesmo período.
+  const lm=dateFilterOnFunil?leadsDiariosFiltrado:kpis.reduce((a,r)=>a+Number(r.leads_mes),0);
+  // vd é só uma ESTIMATIVA de reserva, usada apenas se não houver nenhuma venda
+  // real no Funil Diário — sempre calculada em cima do lm do MESMO recorte
+  // (nunca mistura período com mês), pra não reintroduzir o bug já corrigido.
+  const vd=dateFilterOnFunil?Math.round(lm*SQL_RATE*0.3):kpis.reduce((a,r)=>a+Math.round(Number(r.leads_mes)*Number(r.taxa)/100),0);
+
+  let mql,sql,opor,neg,vendas,visitaAg,visitaReal,emAtendimento,perdido,dia1,dia3,dia7,dia15,nutricao;
+  const funRows=funilFiltrado||getFunilData(s);
+  if(funRows&&funRows.length>0){
+    mql=funRows.reduce((a,r)=>a+r.mql,0);
+    sql=funRows.reduce((a,r)=>a+qualificadosDe(r),0);
+    opor=funRows.reduce((a,r)=>a+r.oportunidades,0);
+    neg=funRows.reduce((a,r)=>a+r.negociacoes,0);
+    vendas=funRows.reduce((a,r)=>a+r.vendas,0)||vd;
+    visitaAg=funRows.reduce((a,r)=>a+(r.visita_agendada||0),0);
+    visitaReal=funRows.reduce((a,r)=>a+(r.visita_realizada||0),0);
+    emAtendimento=funRows.reduce((a,r)=>a+(r.em_atendimento||0),0);
+    perdido=funRows.reduce((a,r)=>a+(r.perdido||0),0);
+    dia1=funRows.reduce((a,r)=>a+(r.dia_1||0),0);
+    dia3=funRows.reduce((a,r)=>a+(r.dia_3||0),0);
+    dia7=funRows.reduce((a,r)=>a+(r.dia_7||0),0);
+    dia15=funRows.reduce((a,r)=>a+(r.dia_15||0),0);
+    nutricao=funRows.reduce((a,r)=>a+(r.nutricao||0),0);
+  } else {
+    mql=Math.round(lm*MQL_RATE);
+    sql=Math.round(lm*SQL_RATE);
+    opor=Math.round(lm*.11);
+    neg=Math.round(lm*.06);
+    vendas=vd;
+    visitaAg=0;visitaReal=0;emAtendimento=0;perdido=0;
+    dia1=0;dia3=0;dia7=0;dia15=0;nutricao=0;
+  }
+
+  const isAreaIncrivel=s.empresa&&s.empresa.split('|').some(e=>e==='Área Incrível')&&!s.empresa.split('|').some(e=>e==='Mais Armazém'||e==='Centro Logístico');
+  const isTerrenistas=s.empresa&&s.empresa.split('|').includes('Terrenistas')&&s.empresa.split('|').length===1;
+
+  // Campos exclusivos Terrenistas
+  const preAnalise=funRows?funRows.reduce((a,r)=>a+(r.pre_analise||0),0):0;
+  const qualificadoTr=funRows?funRows.reduce((a,r)=>a+(r.qualificado_tr||0),0):0;
+  const aguardandoAtendimento=funRows?funRows.reduce((a,r)=>a+(r.aguardando_atendimento||0),0):0;
+  const aguardandoKmz=funRows?funRows.reduce((a,r)=>a+(r.aguardando_kmz||0),0):0;
+
+  let fd=[{l:isTerrenistas?'Cadastro':'Leads',v:lm}];
+  if(isAreaIncrivel){
+    fd.push({l:'Dia 1',v:dia1});
+    fd.push({l:'Dia 3',v:dia3});
+    fd.push({l:'Dia 7',v:dia7});
+    fd.push({l:'Dia 15',v:dia15});
+    fd.push({l:'Nutrição',v:nutricao});
+    fd.push({l:'Leads Qualificados',v:sql});
+    fd.push({l:'Em Atendimento',v:emAtendimento});
+    fd.push({l:'Visita Agendada',v:visitaAg});
+    fd.push({l:'Visita Realizada',v:visitaReal});
+    fd.push({l:'Em Reserva',v:opor});
+    fd.push({l:'Vendas',v:vendas});
+  } else if(isTerrenistas){
+    fd.push({l:'Aguardando Atendimento',v:aguardandoAtendimento});
+    fd.push({l:'Em Atendimento',v:emAtendimento});
+    fd.push({l:'Pré Análise',v:preAnalise});
+    fd.push({l:'Qualificado',v:qualificadoTr});
+    fd.push({l:'Em Negociação',v:neg});
+    fd.push({l:'Aguardando KMZ',v:aguardandoKmz});
+  } else {
+    fd.push({l:'SQL',v:sql});
+    fd.push({l:'Oportunidades',v:opor});
+    fd.push({l:'Negociações',v:neg});
+    fd.push({l:'Vendas',v:vendas});
+  }
+  // "Perdidos" não é etapa de avanço do funil, é saída — mostrado por último,
+  // sempre em vermelho, com % sobre o total de Leads (não sobre a etapa anterior).
+  // "Perdidos" existe só no funil de Área Incrível (Terrenistas não usa essa etapa)
+  const temPerdido=isAreaIncrivel&&perdido>0;
+  if(temPerdido) fd.push({l:'Perdidos',v:perdido,isPerdido:true});
+
+  const fcBase=['#2563EB','#3B82F6','#60A5FA','#818CF8','#A78BFA','#7C3AED','#A855F7','#C026D3','#DB2777','#0891B2','#0D9488','#F59E0B'];
+  const fcTr=['#7C3AED','#8B5CF6','#A855F7','#C026D3','#DB2777','#E11D48','#F97316'];
+  const fc=isAreaIncrivel?fcBase:isTerrenistas?fcTr:['#2563EB','#059669','#0891B2','#D97706','#F59E0B'];
+
+  const subtitleEl=document.getElementById('funnelSubtitle');
+  if(subtitleEl){
+    if(campFiltrado&&funilFiltrado) subtitleEl.textContent='Período selecionado';
+    else if(campFiltrado&&!funilFiltrado) subtitleEl.textContent='Mês todo (sem dado diário de funil pro período)';
+    else subtitleEl.textContent=getSelectedEmpresas(s.empresa).join(' · ');
+  }
+
+  document.getElementById('funnel').innerHTML=fd.map((f,i)=>{
+    const pw=Math.max(5,Math.round(f.v/Math.max(fd[0].v,1)*100));
+    const cor=f.isPerdido?'#DC2626':fc[i];
+    const cv=f.isPerdido?(fd[0].v>0?' · '+Math.round(f.v/fd[0].v*100)+'% dos leads':''):(i>0&&fd[i-1].v>0?' · '+Math.round(f.v/fd[i-1].v*100)+'% ant.':'');
+    return`<div class="fi"><div class="fh"><span class="fn">${f.l}</span><span class="fv">${f.v.toLocaleString('pt-BR')}${cv}</span></div><div class="ft"><div class="fb" style="width:${pw}%;background:${cor}"></div></div></div>`;
+  }).join('');
+}
+
+function renderCacRoi(kpis){
+  destroyChart('cacRoi');
+  if(!kpis.length)return;
+  const lp={id:'lp',afterDatasetsDraw(chart){const{ctx,scales:{y}}=chart;const z=y.getPixelForValue(0);chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach((el,i)=>{const val=ds.data[i];ctx.save();ctx.font='600 11px system-ui';ctx.textAlign='center';if(di===0){ctx.fillStyle='rgba(255,255,255,0.95)';ctx.fillText(fmtBRL(val),el.x,el.y+(z-el.y)/2+4);}else{ctx.fillStyle='rgba(5,100,70,0.9)';ctx.fillText('R$'+Number(val).toFixed(2),el.x,el.y-10);}ctx.restore();});})}};
+  const maxCac=Math.max(...kpis.map(r=>Number(r.cac)))*1.4||2400;
+  const maxRoi=Math.max(...kpis.map(r=>Number(r.roi)))*1.4||60;
+  charts.cacRoi=new Chart(document.getElementById('c4'),{type:'bar',data:{labels:kpis.map(r=>r.empresa),datasets:[{data:kpis.map(r=>Number(r.cac)),backgroundColor:'rgba(220,38,38,0.72)',borderRadius:5,yAxisID:'y'},{data:kpis.map(r=>Number(r.roi)),type:'line',borderColor:'#059669',backgroundColor:'rgba(5,150,105,0.07)',pointBackgroundColor:'#059669',pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:2.5,pointRadius:6,yAxisID:'y2',tension:.3,fill:true}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:28,right:10}},plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:11,weight:'600'}},grid:{display:false}},y:{beginAtZero:true,max:maxCac,ticks:{color:tc,font:{size:10},callback:v=>v===0?'':fmtBRL(v)},grid:{color:gc}},y2:{position:'right',beginAtZero:true,max:maxRoi,ticks:{color:tc,font:{size:10},callback:v=>v===0?'':'R$'+Math.round(v)},grid:{display:false}}}},plugins:[lp]});
+}
+
+
+// Mesma lógica de getLeadsDiariosFiltrado, mas devolve o total por empresa
+// (não só a soma agregada) — usado na tabela "Performance por empresa".
+function getLeadsDiariosPorEmpresa(s){
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const from=document.getElementById('fDateFrom').value;
+  const to=document.getElementById('fDateTo').value;
+  const fromDate=new Date(from+'T00:00:00');
+  const toDate=new Date(to+'T23:59:59');
+  const ano=Number(from.split('-')[0]);
+  const porEmpresa={};
+  selectedEmpresas.forEach(e=>porEmpresa[e]=0);
+  (DB.leadsDiariosAll||[]).forEach(r=>{
+    const data=(r['Data']||r['data']||'').trim();
+    const partes=data.split('/');
+    if(partes.length!==2) return;
+    const d=new Date(ano,Number(partes[1])-1,Number(partes[0]));
+    if(d<fromDate||d>toDate) return;
+    selectedEmpresas.forEach(emp=>{
+      porEmpresa[emp]+=Number(r[emp])||0;
+    });
+  });
+  return porEmpresa;
+}
+
+function renderDailyEmpresaTable(s,funilFiltrado){
+  const dateWrap=document.getElementById('dateRangeWrap');
+  const selectedEmpresas=getSelectedEmpresas(s.empresa);
+  const isAiOrTr=selectedEmpresas.every(e=>e==='Área Incrível'||e==='Terrenistas');
+
+  // Mostra filtro de data só para AI e Terrenistas
+  if(dateWrap) dateWrap.style.display=isAiOrTr?'flex':'none';
+
+  const from=document.getElementById('fDateFrom').value;
+  const to=document.getElementById('fDateTo').value;
+
+  // Se não tem filtro de data ou não é AI/Terrenistas, usa tabela normal
+  if(!isAiOrTr||!from||!to||!DB.camp_diarias.length){
+    return false; // usa renderEmpresaTable normal
+  }
+
+  // Filtra por empresa e intervalo de datas
+  const fromDate=new Date(from+'T00:00:00');
+  const toDate=new Date(to+'T23:59:59');
+  const anoPadrao=Number(from.split('-')[0]);
+
+  const filtrado=DB.camp_diarias.filter(r=>{
+    if(!selectedEmpresas.includes(r.empresa)) return false;
+    const parts=r.data.split('/');
+    let d;
+    if(parts.length===3){
+      d=new Date(parts[2],parts[1]-1,parts[0]);
+    } else if(parts.length===2){
+      d=new Date(anoPadrao,parts[1]-1,parts[0]);
+    } else {
+      return false;
+    }
+    return d>=fromDate&&d<=toDate;
+  });
+
+  const leadsPorEmpresa=getLeadsDiariosPorEmpresa(s);
+  const temLeadsReal=Object.values(leadsPorEmpresa).some(v=>v>0);
+  if(!filtrado.length&&!temLeadsReal){
+    document.getElementById('empresaTb').innerHTML='<tr><td colspan="11" class="empty">Nenhum dado para o período selecionado.</td></tr>';
+    return true;
+  }
+
+  // Agrupa Investimento por empresa (Meta, Campanhas Diárias)
+  const grupos={};
+  filtrado.forEach(r=>{
+    if(!grupos[r.empresa]) grupos[r.empresa]={empresa:r.empresa,inv:0,leads:0,vendas:0,receita:0};
+    grupos[r.empresa].inv+=r.investimento;
+  });
+  // Leads sempre do GHL (Leads Diários), não do Meta — mesmo princípio da Visão Geral
+  Object.keys(leadsPorEmpresa).forEach(emp=>{
+    if(!grupos[emp]) grupos[emp]={empresa:emp,inv:0,leads:0,vendas:0,receita:0};
+    grupos[emp].leads=leadsPorEmpresa[emp];
+  });
+
+  // Busca SQL/Qualificado do funil — usa o diário (período exato) quando
+  // disponível; senão cai pro total do mês.
+  const funRows=funilFiltrado||getFunilData(s);
+
+  const rows=Object.values(grupos).map(g=>{
+    const cpl=g.leads>0?g.inv/g.leads:0;
+    const funR=funRows?funRows.find(f=>f.empresa===g.empresa):null;
+    const sql=funR?qualificadosDe(funR):'—';
+    const vendas=funR?(funR.vendas||0):0;
+    const receita=funR?(funR.receita||0):0;
+    const cac=vendas>0?g.inv/vendas:0;
+    const roi=g.inv>0&&receita>0?receita/g.inv:0;
+    const conversao=g.leads>0?vendas/g.leads*100:0;
+    return`<tr><td style="font-weight:600">${g.empresa}</td><td>${g.leads.toLocaleString('pt-BR')}</td><td style="color:#047857;font-weight:600">${sql}</td><td>${fmtBRL(g.inv)}</td><td>${cpl>0?fmtBRL(cpl):'—'}</td><td>${cac>0?fmtBRL(cac):'—'}</td><td>${vendas>0?vendas:'—'}</td><td>${receita>0?fmtBRL(receita):'—'}</td><td>${roi>0?roi.toFixed(2)+'x':'—'}</td><td>${conversao>0?conversao.toFixed(1)+'%':'—'}</td><td><span class="bk bwn">— período</span></td></tr>`;
+  }).join('');
+
+  document.getElementById('empresaTb').innerHTML=rows;
+  return true;
+}
+
+function renderEmpresaTable(kpis,s){
+  if(!kpis.length){document.getElementById('empresaTb').innerHTML=`<tr><td colspan="11" class="empty">Nenhum dado para os filtros selecionados.</td></tr>`;return;}
+  const funRows=getFunilData(s);
+  const rows=kpis.map(r=>{
+    const vd=Math.round(Number(r.leads_mes)*Number(r.taxa)/100);
+    const funR=funRows?funRows.find(f=>f.empresa===r.empresa):null;
+    const mql=funR?funR.mql:Math.round(Number(r.leads_mes)*MQL_RATE);
+    const sql=funR?qualificadosDe(funR):Math.round(Number(r.leads_mes)*SQL_RATE);
+    const mp=r.meta_mes>0?Math.round(Number(r.leads_mes)/Number(r.meta_mes)*100):0;
+    const bc=mp>=100?'bok':mp>=80?'bwn':'bbd';
+    const ic=mp>=100?'🟢':mp>=80?'🟡':'🔴';
+    return`<tr><td style="font-weight:600">${r.empresa}</td><td>${Number(r.leads_mes).toLocaleString('pt-BR')}</td><td style="color:#047857;font-weight:600">${sql}</td><td>${fmtBRL(r.investimento)}</td><td>${fmtBRL(r.cpl)}</td><td>${r.cac>0?fmtBRL(r.cac):'—'}</td><td>${vd}</td><td>${fmtBRL(r.receita)}</td><td>${r.roi>0?Number(r.roi).toFixed(2)+'x':'—'}</td><td>${Number(r.taxa).toFixed(1)}%</td><td><span class="bk ${bc}">${ic} ${mp}%</span></td></tr>`;
+  });
+  document.getElementById('empresaTb').innerHTML=rows.join('');
+}
+
+function renderCampTable(data){
+  if(!data.length){document.getElementById('campTb').innerHTML=`<tr><td colspan="11" class="empty">Nenhuma campanha para os filtros selecionados.</td></tr>`;return;}
+  const s=getState();
+
+  document.getElementById('campTb').innerHTML=data.map(c=>{
+    // Mostra apenas o que está preenchido na planilha — sem cálculos automáticos
+    const invNum=parseBR(c.investimento);
+    const vendas=c.vendas>0?c.vendas:'—';
+    const roi=c.roi>0?c.roi.toFixed(1):'—';
+    const roiOk=c.roi>=1;
+    return`<tr><td style="font-weight:600">${c.campanha}</td><td>${c.empresa}</td><td>${c.plataforma||'—'}</td><td>${c.investimento}</td><td>${c.impressoes}</td><td>${c.cliques}</td><td>${c.ctr}</td><td>${c.leads}</td><td>${c.cpl}</td><td>${vendas}</td><td><span class="bk ${roiOk?'bok':'bbd'}">${roi!=='—'?'R$'+roi:'—'}</span></td></tr>`;
+  }).join('');
+}
+
+// Versão do quadro de campanhas usada quando o filtro de datas está ativo.
+// Agrega Campanhas Diárias (que só tem Campanha/Empresa/Plataforma/Investimento/Leads)
+// dentro do intervalo escolhido. Impressões, Cliques, CTR, Vendas e ROI não têm
+// granularidade diária, então aparecem como "—" nesse modo.
+function renderCampTableDiario(camps){
+  if(!camps||!camps.length){document.getElementById('campTb').innerHTML=`<tr><td colspan="11" class="empty">Nenhuma campanha no período selecionado.</td></tr>`;return;}
+  const grupos={};
+  camps.forEach(r=>{
+    const key=r.campanha+'|'+r.empresa+'|'+r.plataforma;
+    if(!grupos[key]) grupos[key]={campanha:r.campanha,empresa:r.empresa,plataforma:r.plataforma,inv:0,leads:0};
+    grupos[key].inv+=r.investimento;
+    grupos[key].leads+=r.leads;
+  });
+  const rows=Object.values(grupos).sort((a,b)=>b.inv-a.inv);
+  document.getElementById('campTb').innerHTML=rows.map(c=>{
+    const cpl=c.leads>0?c.inv/c.leads:0;
+    return`<tr><td style="font-weight:600">${c.campanha}</td><td>${c.empresa}</td><td>${c.plataforma||'—'}</td><td>${fmtBRL(c.inv)}</td><td>—</td><td>—</td><td>—</td><td>${c.leads}</td><td>${cpl>0?fmtBRL(cpl):'—'}</td><td>—</td><td>—</td></tr>`;
+  }).join('');
+}
+
+function renderAlerts(kpis,camps,dateFilterOn){
+  const titleEl=document.getElementById('alertsSectionTitle');
+  if(titleEl) titleEl.innerHTML=dateFilterOn
+    ? 'Alertas inteligentes <span class="mu" style="font-weight:400;font-size:12px">— baseado no mês corrente (campanhas não têm ROI por dia)</span>'
+    : 'Alertas inteligentes';
+  const alerts=[];
+
+  // ROI por empresa — só considera quem tem ROI real (>0)
+  const comROI=kpis.filter(k=>k.roi>0);
+  if(comROI.length>0){
+    const sorted=[...comROI].sort((a,b)=>b.roi-a.roi);
+    const best=sorted[0],worst=sorted[sorted.length-1];
+    if(best) alerts.push({t:'ok',m:`${best.empresa} tem o maior ROI (${best.roi.toFixed(1)}x) — priorizar orçamento neste canal.`});
+    if(worst&&worst!==best) alerts.push({t:'wn',m:`${worst.empresa} tem o menor ROI (${worst.roi.toFixed(1)}x) — revisar estratégia e criativos.`});
+  }
+
+  // Campanhas com ROI real negativo (só quando ROI foi de fato calculado, não "—")
+  const badCamp=camps.filter(c=>c.roi>0&&c.roi<1);
+  badCamp.forEach(c=>alerts.push({t:'bd',m:`Campanha "${c.campanha}" com ROI abaixo de 1x (${c.roi.toFixed(1)}x) — avaliar pausa imediata.`}));
+
+  // Má alocação de orçamento: dentro da mesma empresa+plataforma, campanha cara recebendo maior % do budget
+  const grupos={};
+  camps.forEach(c=>{
+    const key=c.empresa+'|'+c.plataforma;
+    if(!grupos[key]) grupos[key]=[];
+    const inv=parseBR(c.investimento);
+    const leads=Number(c.leads)||0;
+    if(inv>0) grupos[key].push({campanha:c.campanha,inv,leads,cpl:leads>0?inv/leads:Infinity});
+  });
+  Object.entries(grupos).forEach(([key,lista])=>{
+    if(lista.length<2) return;
+    const totalInv=lista.reduce((a,c)=>a+c.inv,0);
+    const maisCara=[...lista].sort((a,b)=>b.cpl-a.cpl)[0];
+    const maisBarata=[...lista].sort((a,b)=>a.cpl-b.cpl)[0];
+    const pctMaisCara=Math.round(maisCara.inv/totalInv*100);
+    if(maisCara.cpl!==Infinity&&maisBarata.cpl!==Infinity&&maisCara.cpl>maisBarata.cpl*3&&pctMaisCara>=40){
+      const [empresa]=key.split('|');
+      alerts.push({t:'wn',m:`${empresa}: campanha "${maisCara.campanha}" recebe ${pctMaisCara}% do orçamento mas tem CPL ${(maisCara.cpl/maisBarata.cpl).toFixed(1)}x maior que "${maisBarata.campanha}" — considerar realocar verba.`});
+    }
+  });
+
+  const icons={ok:'✓',wn:'⚠',bd:'✕'};
+  if(alerts.length===0){
+    document.getElementById('alertsBox').innerHTML='<div class="al aok"><span>—</span><span>Sem alertas no momento — dados insuficientes para análise (preencha Vendas/Receita na aba KPIs).</span></div>';
+  } else {
+    document.getElementById('alertsBox').innerHTML=alerts.map(a=>`<div class="al a${a.t}"><span>${icons[a.t]}</span><span>${a.m}</span></div>`).join('');
+  }
+}
+
+// Gera opções de período automaticamente (mês atual + 12 meses anteriores)
+(function gerarPeriodos(){
+  const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const sel=document.getElementById('fPeriod');
+  const hoje=new Date();
+  for(let i=0;i<13;i++){
+    const d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+    const label=meses[d.getMonth()]+' '+d.getFullYear();
+    const opt=document.createElement('option');
+    opt.value=label;
+    opt.textContent=label;
+    sel.appendChild(opt);
+  }
+})();
+
+loadAllData();
+</script>
+</body>
+</html>
