@@ -594,7 +594,7 @@ async function loadAllData(){
   for(let i=0;i<13;i++){const d=new Date(hojeKpi.getFullYear(),hojeKpi.getMonth()-i,1);periods.push(mesesAbrevKpi[d.getMonth()]+' '+d.getFullYear());}
         periods.forEach(period=>{
           const mesCsv=mesMap[period];
-          const rows=validFunil.filter(r=>(r['Mês']||'').trim()===mesCsv);
+          const rows=validFunil.filter(r=>(r['Mês']||'').trim().toLowerCase()===mesCsv.toLowerCase());
           if(rows.length>0){
             DB.funil[period]=rows.map(r=>({
               empresa:(r['Empresa']||'').trim(),
@@ -718,7 +718,7 @@ function mergeKpis(rows){
   for(let i=0;i<13;i++){const d=new Date(hojeKpi.getFullYear(),hojeKpi.getMonth()-i,1);periods.push(mesesAbrevKpi[d.getMonth()]+' '+d.getFullYear());}
   periods.forEach(period=>{
     const mesCsv=mesMap[period];
-    const rowsDoMes=allRows.filter(r=>(r['Mês']||r['mes']||'').trim()===mesCsv);
+    const rowsDoMes=allRows.filter(r=>(r['Mês']||r['mes']||'').trim().toLowerCase()===mesCsv.toLowerCase());
     if(rowsDoMes.length>0){
       DB.kpis[period]=rowsDoMes.map(r=>({
         empresa:(r['Empresa']||r['empresa']||'').trim(),
@@ -748,7 +748,7 @@ function onEmpresaChange(){
   const prev=sel.value;
   sel.innerHTML='<option>Todas as campanhas</option>';
   const selectedEmpresas=getSelectedEmpresas(s.empresa);
-  const fonte=(DB.campanhasAll||DB.campanhas).filter(c=>(!c.mes||c.mes===mesCsv)&&selectedEmpresas.includes(c.empresa));
+  const fonte=(DB.campanhasAll||DB.campanhas).filter(c=>(!c.mes||c.mes.toLowerCase()===mesCsv.toLowerCase())&&selectedEmpresas.includes(c.empresa));
   [...new Set(fonte.map(c=>c.campanha))].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
   if([...sel.options].some(o=>o.value===prev))sel.value=prev;
   applyFilters();
@@ -777,7 +777,7 @@ function applyFilters(){
   const mesCsvPlat=mesMap2[s.period]||'';
   const platSource=DB.plataformasAll||[];
   const platFiltrado=platSource
-    .filter(r=>!r.mes||r.mes===mesCsvPlat)
+    .filter(r=>!r.mes||r.mes.toLowerCase()===mesCsvPlat.toLowerCase())
     .filter(r=>!r.empresa||getSelectedEmpresas(s.empresa).includes(r.empresa))
     .filter(r=>r.leads>0);
   // Agrupa por plataforma somando leads
@@ -792,13 +792,13 @@ const mesMap={};
 const hojeCamp=new Date();
 for(let i=0;i<24;i++){const d=new Date(hojeCamp.getFullYear(),hojeCamp.getMonth()-i,1);const k=mesesAbrevCamp[d.getMonth()]+' '+d.getFullYear();const v=mesesAbrevCamp[d.getMonth()]+'/'+String(d.getFullYear()).slice(2);mesMap[k]=v;}
 const mesCsv=mesMap[s.period]||'';
-const campBase=(DB.campanhasAll||DB.campanhas).filter(c=>!c.mes||c.mes===mesCsv||mesCsv==='');
+const campBase=(DB.campanhasAll||DB.campanhas).filter(c=>!c.mes||c.mes.toLowerCase()===mesCsv.toLowerCase()||mesCsv==='');
 const campData=campBase.filter(c=>getSelectedEmpresas(s.empresa).includes(c.empresa)&&(s.plat==='Todas as plataformas'||c.plataforma===s.plat)&&(s.camp==='Todas as campanhas'||c.campanha===s.camp));
   // Atualiza dropdown de campanhas conforme período e empresa selecionados
   const selCamp=document.getElementById('fCamp');
   const prevCamp=selCamp.value;
   selCamp.innerHTML='<option>Todas as campanhas</option>';
-  const fonteCamp=(DB.campanhasAll||DB.campanhas).filter(c=>(!c.mes||c.mes===mesCsv)&&getSelectedEmpresas(s.empresa).includes(c.empresa)&&(s.plat==='Todas as plataformas'||c.plataforma===s.plat));
+  const fonteCamp=(DB.campanhasAll||DB.campanhas).filter(c=>(!c.mes||c.mes.toLowerCase()===mesCsv.toLowerCase())&&getSelectedEmpresas(s.empresa).includes(c.empresa)&&(s.plat==='Todas as plataformas'||c.plataforma===s.plat));
   [...new Set(fonteCamp.map(c=>c.campanha))].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;selCamp.appendChild(o);});
   if([...selCamp.options].some(o=>o.value===prevCamp))selCamp.value=prevCamp;
 
