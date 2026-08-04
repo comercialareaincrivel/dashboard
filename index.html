@@ -83,7 +83,7 @@ tr:hover td{background:#F9FAFB}
 <div class="hd">
   <div class="hrow">
     <div>
-      <p class="ey">Área Incrível</p>
+      <p class="ey">Grupo MNGT</p>
       <h1 class="h1">Dashboard de Marketing</h1>
       <p class="hs" id="subTitle">Área Incrível · Terrenistas</p>
     </div>
@@ -770,7 +770,10 @@ function applyFilters(){
   const selectedEmpresas=getSelectedEmpresas(s.empresa);
   const kpis=(DB.kpis[s.period]||[]).filter(r=>selectedEmpresas.includes(r.empresa));
   // Filtra plataformas pelo período
-  const mesMap2={'Jul 2026':'Jul/26','Jun 2026':'Jun/26','Mai 2026':'Mai/26','Abr 2026':'Abr/26','Mar 2026':'Mar/26','Fev 2026':'Fev/26','Jan 2026':'Jan/26'};
+  const mesesAbrevPlat=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesMap2={};
+  const hojePlat=new Date();
+  for(let i=0;i<24;i++){const d=new Date(hojePlat.getFullYear(),hojePlat.getMonth()-i,1);const k=mesesAbrevPlat[d.getMonth()]+' '+d.getFullYear();const v=mesesAbrevPlat[d.getMonth()]+'/'+String(d.getFullYear()).slice(2);mesMap2[k]=v;}
   const mesCsvPlat=mesMap2[s.period]||'';
   const platSource=DB.plataformasAll||[];
   const platFiltrado=platSource
@@ -784,7 +787,10 @@ function applyFilters(){
   const platDataAll=Object.entries(platMap).map(([p,leads])=>({p,leads,cor:CORES[p]||'#9CA3AF'})).sort((a,b)=>b.leads-a.leads);
   const platData=platDataAll.filter(r=>s.plat==='Todas as plataformas'||r.p===s.plat);
   // Filtra campanhas pelo período selecionado
-const mesMap={'Jul 2026':'Jul/26','Jun 2026':'Jun/26','Mai 2026':'Mai/26','Abr 2026':'Abr/26','Mar 2026':'Mar/26','Fev 2026':'Fev/26','Jan 2026':'Jan/26'};
+const mesesAbrevCamp=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const mesMap={};
+const hojeCamp=new Date();
+for(let i=0;i<24;i++){const d=new Date(hojeCamp.getFullYear(),hojeCamp.getMonth()-i,1);const k=mesesAbrevCamp[d.getMonth()]+' '+d.getFullYear();const v=mesesAbrevCamp[d.getMonth()]+'/'+String(d.getFullYear()).slice(2);mesMap[k]=v;}
 const mesCsv=mesMap[s.period]||'';
 const campBase=(DB.campanhasAll||DB.campanhas).filter(c=>!c.mes||c.mes===mesCsv||mesCsv==='');
 const campData=campBase.filter(c=>getSelectedEmpresas(s.empresa).includes(c.empresa)&&(s.plat==='Todas as plataformas'||c.plataforma===s.plat)&&(s.camp==='Todas as campanhas'||c.campanha===s.camp));
